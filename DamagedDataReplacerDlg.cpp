@@ -1,4 +1,4 @@
-﻿
+
 // DamagedDataReplacerDlg.cpp: 实现文件
 //
 
@@ -40,12 +40,12 @@ CDamagedDataReplacerDlg::CDamagedDataReplacerDlg(CWnd* pParent /*=nullptr*/)
     , m_exportLog(true)
     , m_isComparing(false)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CDamagedDataReplacerDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+    CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_MFCEDITBROWSE1, m_editBrowseCtrl1);
     DDX_Control(pDX, IDC_MFCEDITBROWSE2, m_editBrowseCtrl2);
     DDX_Control(pDX, IDC_EDIT1, m_editCtrl);
@@ -56,8 +56,8 @@ void CDamagedDataReplacerDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDamagedDataReplacerDlg, CDialogEx)
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
+    ON_WM_PAINT()
+    ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BUTTON1, &CDamagedDataReplacerDlg::OnBnClickedButton1)
     ON_BN_CLICKED(IDC_CHECK1, &CDamagedDataReplacerDlg::OnBnClickedCheck1)
     ON_BN_CLICKED(IDC_CHECK2, &CDamagedDataReplacerDlg::OnBnClickedCheck2)
@@ -68,9 +68,9 @@ END_MESSAGE_MAP()
 
 BOOL CDamagedDataReplacerDlg::OnInitDialog()
 {
-	CDialogEx::OnInitDialog();
-	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
-	//  执行此操作
+    CDialogEx::OnInitDialog();
+    // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
+    //  执行此操作
 
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     SetIcon(m_hIcon, TRUE);			// 设置大图标
@@ -87,7 +87,7 @@ BOOL CDamagedDataReplacerDlg::OnInitDialog()
     m_checkBox2.SetCheck(BST_CHECKED);
 
 
-	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+    return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
 // 如果向对话框添加最小化按钮，则需要下面的代码
@@ -96,34 +96,34 @@ BOOL CDamagedDataReplacerDlg::OnInitDialog()
 
 void CDamagedDataReplacerDlg::OnPaint()
 {
-	if (IsIconic())
-	{
-		CPaintDC dc(this); // 用于绘制的设备上下文
+    if (IsIconic())
+    {
+        CPaintDC dc(this); // 用于绘制的设备上下文
 
-		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+        SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
-		// 使图标在工作区矩形中居中
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
+        // 使图标在工作区矩形中居中
+        int cxIcon = GetSystemMetrics(SM_CXICON);
+        int cyIcon = GetSystemMetrics(SM_CYICON);
+        CRect rect;
+        GetClientRect(&rect);
+        int x = (rect.Width() - cxIcon + 1) / 2;
+        int y = (rect.Height() - cyIcon + 1) / 2;
 
-		// 绘制图标
-		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
-		CDialogEx::OnPaint();
-	}
+        // 绘制图标
+        dc.DrawIcon(x, y, m_hIcon);
+    }
+    else
+    {
+        CDialogEx::OnPaint();
+    }
 }
 
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
 HCURSOR CDamagedDataReplacerDlg::OnQueryDragIcon()
 {
-	return static_cast<HCURSOR>(m_hIcon);
+    return static_cast<HCURSOR>(m_hIcon);
 }
 
 
@@ -159,13 +159,18 @@ void CDamagedDataReplacerDlg::OnBnClickedButton1()
 
     m_filesA.clear();
     m_filesB.clear();
+    m_initialDamagedFiles.clear();
 
     LogMessage(_T("正在遍历全部文件…"));
     TraverseFolder(folderA, m_filesA, m_includeSubDirs, true);
     TraverseFolder(folderB, m_filesB, true, false);
 
+    // 保存初始的损坏文件列表
+    m_initialDamagedFiles = m_filesA;
+
     m_compareThread = std::thread(&CDamagedDataReplacerDlg::CompareAndReplaceFiles, this);
 }
+
 void CDamagedDataReplacerDlg::ResetState()
 {
     if (m_compareThread.joinable())
@@ -214,15 +219,15 @@ void CDamagedDataReplacerDlg::TraverseFolder(const CString& folderPath, std::vec
 
 void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
 {
-    int totalFiles = static_cast<int>(m_filesA.size());
-    int perfectMatches = 0;
-    int multipleMatches = 0;
-    int unmatchedFiles = 0;
+    size_t totalFiles = m_initialDamagedFiles.size();
+    size_t perfectMatches = 0;
+    size_t multipleMatches = 0;
+    size_t unmatchedFiles = 0;
 
-    for (int i = 0; i < totalFiles && m_isComparing; ++i)
+    for (size_t i = 0; i < totalFiles && m_isComparing; ++i)
     {
-        const auto& fileA = m_filesA[i];
-        fs::path pathA(fileA);
+        const auto& damagedFile = m_initialDamagedFiles[i];
+        fs::path pathA(damagedFile);
         auto sizeA = fs::file_size(pathA);
         auto extA = pathA.extension();
 
@@ -239,9 +244,9 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
         if (matches.size() == 1)
         {
             perfectMatches++;
-            fs::copy(matches[0], fileA, fs::copy_options::overwrite_existing);
-            fs::last_write_time(fileA, fs::last_write_time(pathA));
-            LogMessage(CString(_T("从")) + matches[0].c_str() + _T("替换") + fileA.c_str());
+            fs::copy(matches[0], damagedFile, fs::copy_options::overwrite_existing);
+            fs::last_write_time(damagedFile, fs::last_write_time(pathA));
+            LogMessage(CString(_T("从")) + matches[0].c_str() + _T("替换") + damagedFile.c_str());
         }
         else if (matches.size() > 1)
         {
@@ -258,14 +263,14 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
         else
         {
             unmatchedFiles++;
-            LogMessage(CString(_T("未找到匹配文件：")) + fileA.c_str());
+            LogMessage(CString(_T("未找到匹配文件：")) + damagedFile.c_str());
         }
 
         UpdateProgress(i + 1, totalFiles);
     }
 
     CString summary;
-    summary.Format(_T("比对完成。总用时：%d秒，被比对文件数量：%d，完美替换文件数量：%d，多个替换文件数量：%d，未替换文件数量：%d。"),
+    summary.Format(_T("比对完成。总用时：%d秒，被比对文件数量：%zu，完美替换文件数量：%zu，多个替换文件数量：%zu，未替换文件数量：%zu。"),
         0, totalFiles, perfectMatches, multipleMatches, unmatchedFiles); // 这里的总用时可以根据实际情况计算
     LogMessage(summary);
 
