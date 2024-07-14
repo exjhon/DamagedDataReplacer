@@ -131,13 +131,7 @@ void CDamagedDataReplacerDlg::OnBnClickedButton1()
 {
     if (m_isComparing)
     {
-        m_isComparing = false;
-        if (m_compareThread.joinable())
-        {
-            m_compareThread.join();
-        }
-        LogMessage(_T("比对已取消。"));
-        m_button1.SetWindowText(_T("开始比对"));
+        // 比对过程中按钮不可用
         return;
     }
 
@@ -154,7 +148,8 @@ void CDamagedDataReplacerDlg::OnBnClickedButton1()
     }
 
     m_isComparing = true;
-    m_button1.SetWindowText(_T("取消比对"));
+    m_button1.EnableWindow(FALSE); // 禁用按钮
+    m_button1.SetWindowText(_T("文件比对中…"));
     m_editCtrl.SetWindowText(_T(""));
 
     m_filesA.clear();
@@ -178,43 +173,10 @@ void CDamagedDataReplacerDlg::ResetState()
         m_compareThread.join();
     }
     m_isComparing = false;
+    m_button1.EnableWindow(TRUE); // 启用按钮
     m_button1.SetWindowText(_T("开始比对"));
     m_progressCtrl.SetPos(0);
     m_editCtrl.SetWindowText(_T(""));
-}
-
-void CDamagedDataReplacerDlg::OnBnClickedCheck1()
-{
-    m_includeSubDirs = (m_checkBox1.GetCheck() == BST_CHECKED);
-}
-
-void CDamagedDataReplacerDlg::OnBnClickedCheck2()
-{
-    m_exportLog = (m_checkBox2.GetCheck() == BST_CHECKED);
-}
-
-void CDamagedDataReplacerDlg::TraverseFolder(const CString& folderPath, std::vector<std::wstring>& fileList, bool includeSubDirs, bool isDamagedFolder)
-{
-    if (isDamagedFolder && !includeSubDirs)
-    {
-        for (const auto& entry : fs::directory_iterator(folderPath.GetString()))
-        {
-            if (entry.is_regular_file())
-            {
-                fileList.push_back(entry.path().wstring());
-            }
-        }
-    }
-    else
-    {
-        for (const auto& entry : fs::recursive_directory_iterator(folderPath.GetString()))
-        {
-            if (entry.is_regular_file())
-            {
-                fileList.push_back(entry.path().wstring());
-            }
-        }
-    }
 }
 
 void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
@@ -266,7 +228,11 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
             LogMessage(CString(_T("未找到匹配文件：")) + damagedFile.c_str());
         }
 
-        UpdateProgress(i + 1, totalFiles);
+        // 更频繁地更新进度条
+        if (i % 10 == 0 || i == totalFiles - 1) // 每处理10个文件或最后一个文件时更新一次
+        {
+            UpdateProgress(i + 1, totalFiles);
+        }
     }
 
     CString summary;
@@ -280,8 +246,47 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
     }
 
     m_isComparing = false;
+    m_button1.EnableWindow(TRUE); // 启用按钮
     m_button1.SetWindowText(_T("开始比对"));
 }
+
+
+
+void CDamagedDataReplacerDlg::OnBnClickedCheck1()
+{
+    m_includeSubDirs = (m_checkBox1.GetCheck() == BST_CHECKED);
+}
+
+void CDamagedDataReplacerDlg::OnBnClickedCheck2()
+{
+    m_exportLog = (m_checkBox2.GetCheck() == BST_CHECKED);
+}
+
+void CDamagedDataReplacerDlg::TraverseFolder(const CString& folderPath, std::vector<std::wstring>& fileList, bool includeSubDirs, bool isDamagedFolder)
+{
+    if (isDamagedFolder && !includeSubDirs)
+    {
+        for (const auto& entry : fs::directory_iterator(folderPath.GetString()))
+        {
+            if (entry.is_regular_file())
+            {
+                fileList.push_back(entry.path().wstring());
+            }
+        }
+    }
+    else
+    {
+        for (const auto& entry : fs::recursive_directory_iterator(folderPath.GetString()))
+        {
+            if (entry.is_regular_file())
+            {
+                fileList.push_back(entry.path().wstring());
+            }
+        }
+    }
+}
+
+
 
 void CDamagedDataReplacerDlg::LogMessage(const CString& message)
 {
