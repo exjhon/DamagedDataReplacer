@@ -47,7 +47,7 @@ private:
     void CompareAndReplaceFiles();
     void LogMessage(const CString& message);
     void ExportLog();
-    void UpdateProgress(int current, int total);
+    void UpdateProgress(size_t current, size_t total);
     void ResetState();
     CMFCEditBrowseCtrl m_editBrowseCtrl1;
     CMFCEditBrowseCtrl m_editBrowseCtrl2;
