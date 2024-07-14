@@ -311,7 +311,7 @@ void CDamagedDataReplacerDlg::ExportLog()
     logFile.close();
 }
 
-void CDamagedDataReplacerDlg::UpdateProgress(int current, int total)
+void CDamagedDataReplacerDlg::UpdateProgress(size_t current, size_t total)
 {
     int progress = static_cast<int>((static_cast<double>(current) / total) * 100);
     m_progressCtrl.SetPos(progress);
