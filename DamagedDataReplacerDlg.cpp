@@ -83,7 +83,7 @@ BOOL CDamagedDataReplacerDlg::OnInitDialog()
     // 初始化控件
     m_editBrowseCtrl1.EnableFolderBrowseButton();
     m_editBrowseCtrl2.EnableFolderBrowseButton();
-    //m_checkBox1.SetCheck(BST_CHECKED);
+    m_checkBox1.SetCheck(BST_CHECKED);
     m_checkBox2.SetCheck(BST_CHECKED);
 
 
