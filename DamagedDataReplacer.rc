@@ -123,12 +123,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Nobody"
             VALUE "FileDescription", "DamagedDataReplacer"
-            VALUE "FileVersion", "1.0.0.2"
+            VALUE "FileVersion", "1.0.0.3"
             VALUE "InternalName", "DamagedDataReplacer.exe"
             VALUE "LegalCopyright", "Open Source"
             VALUE "OriginalFilename", "DamagedDataReplacer.exe"
             VALUE "ProductName", "DamagedDataReplacer"
-            VALUE "ProductVersion", "1.0.0.2"
+            VALUE "ProductVersion", "1.0.0.3"
         END
     END
     BLOCK "VarFileInfo"
