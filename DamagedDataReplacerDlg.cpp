@@ -83,8 +83,8 @@ BOOL CDamagedDataReplacerDlg::OnInitDialog()
     // 初始化控件
     m_editBrowseCtrl1.EnableFolderBrowseButton();
     m_editBrowseCtrl2.EnableFolderBrowseButton();
-    m_checkBox1.SetCheck(BST_CHECKED);
-    m_checkBox2.SetCheck(BST_CHECKED);
+    //m_checkBox1.SetCheck(BST_CHECKED);
+   // m_checkBox2.SetCheck(BST_CHECKED);
 
 
     return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -191,13 +191,19 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
         const auto& damagedFile = m_initialDamagedFiles[i];
         fs::path pathA(damagedFile);
         auto sizeA = fs::file_size(pathA);
-        auto extA = pathA.extension();
+        auto extA = pathA.extension().wstring();
+
+        // 将后缀名转换为小写
+        std::transform(extA.begin(), extA.end(), extA.begin(), ::towlower);
 
         std::vector<std::wstring> matches;
         for (const auto& fileB : m_filesB)
         {
             fs::path pathB(fileB);
-            if (pathB.extension() == extA && fs::file_size(pathB) == sizeA)
+            auto extB = pathB.extension().wstring();
+            std::transform(extB.begin(), extB.end(), extB.begin(), ::towlower);
+
+            if (extB == extA && fs::file_size(pathB) == sizeA)
             {
                 matches.push_back(fileB);
             }
