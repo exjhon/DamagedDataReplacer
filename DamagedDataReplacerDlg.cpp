@@ -191,7 +191,11 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
         const auto& damagedFile = m_initialDamagedFiles[i];
         fs::path pathA(damagedFile);
         auto sizeA = fs::file_size(pathA);
-        auto extA = pathA.extension().wstring();
+
+        // 找到最后一个点的位置来获取后缀名
+        std::wstring filenameA = pathA.filename().wstring();
+        size_t posA = filenameA.rfind(L'.');
+        std::wstring extA = (posA != std::wstring::npos) ? filenameA.substr(posA) : L"";
 
         // 将后缀名转换为小写
         std::transform(extA.begin(), extA.end(), extA.begin(), ::towlower);
@@ -200,7 +204,10 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
         for (const auto& fileB : m_filesB)
         {
             fs::path pathB(fileB);
-            auto extB = pathB.extension().wstring();
+            std::wstring filenameB = pathB.filename().wstring();
+            size_t posB = filenameB.rfind(L'.');
+            std::wstring extB = (posB != std::wstring::npos) ? filenameB.substr(posB) : L"";
+
             std::transform(extB.begin(), extB.end(), extB.begin(), ::towlower);
 
             if (extB == extA && fs::file_size(pathB) == sizeA)
@@ -255,7 +262,6 @@ void CDamagedDataReplacerDlg::CompareAndReplaceFiles()
     m_button1.EnableWindow(TRUE); // 启用按钮
     m_button1.SetWindowText(_T("开始比对"));
 }
-
 
 
 void CDamagedDataReplacerDlg::OnBnClickedCheck1()
